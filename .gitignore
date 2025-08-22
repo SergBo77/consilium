@@ -1,0 +1,15 @@
+*.http
+*.toml
+
+src/registers/
+src/registers_anal/
+build/qdrant_data/
+
+.venv/
+.idea/
+.vscode/
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

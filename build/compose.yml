@@ -1,0 +1,29 @@
+name: consilium
+
+services:
+  fastapi:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile
+    env_file: .env
+    environment:
+      - PYTHONPATH=/app
+      - QDRANT_HOST=qdrant # Используем имя сервиса как хост
+    ports:
+      - "8002:8002"
+    depends_on:
+      - qdrant
+    volumes:
+      - C:\papka\python\consillium\files:/data/files
+      - huggingface_cache:/root/.cache/huggingface
+
+  qdrant:
+    image: qdrant/qdrant:v1.1.1
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+
+volumes:
+  huggingface_cache:

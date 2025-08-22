@@ -1,0 +1,25 @@
+services:
+  {{APP}}:
+    image: $IMAGE
+    container_name: $CONTAINER_NAME
+    pull_policy: always
+    env_file:
+      - path: .env
+        required: true 
+      - path: .service.env
+        required: false
+    restart: unless-stopped
+    ports:
+      - ${PORT}:80
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 150M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+        tag: "{{.Name}}"
+
