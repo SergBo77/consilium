@@ -9,8 +9,8 @@ services:
     environment:
       - PYTHONPATH=/app
       - QDRANT_HOST=qdrant # Используем имя сервиса как хост
-    ports:
-      - "8002:8002"
+#    ports:
+#      - "8002:8002"
     depends_on:
       - qdrant
     volumes:
@@ -24,6 +24,24 @@ services:
       - "6334:6334"
     volumes:
       - ./qdrant_data:/qdrant/storage
+
+  lookaround:
+    build:
+      context: ../LookAround
+      dockerfile: Dockerfile
+    depends_on:
+      - fastapi
+
+  nginx:
+    image: nginx:1.28-alpine
+    ports:
+      - "80:80"
+    volumes:
+     # - ./LookAround/dist:/usr/share/nginx/html # dist сам создаётся
+      - ../build/nginx.conf:/etc/nginx/nginx.conf:ro # :ro read only
+    depends_on:
+      - fastapi
+      - lookaround
 
 volumes:
   huggingface_cache:
