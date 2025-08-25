@@ -60,3 +60,4 @@ async def request_post(request: Request, req: str = Body()):  # ?
         result_ru = await translator.english_to_russian(result_gen_eng)
         logger.info(f'ответ успешно сгенерирован:\n {result_ru}')
         return result_ru
+
