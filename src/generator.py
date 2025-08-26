@@ -1,6 +1,7 @@
 from qdrant_client import QdrantClient
 import torch
 from functools import lru_cache
+import re
 
 class MedicalTextGenerator:
     def __init__(self, biobert_tokenizer, biobert_model, llm, qdrant_path: str = r"/qdrant/storage"):
@@ -94,12 +95,14 @@ class MedicalTextGenerator:
                 return "No relevant documents found" # Четкое уведомление об отсутствии данных
 
             context = "\n".join([f"[Источник {i+1}]: {doc[:300]}"
-                              for i, doc in enumerate(context_docs)])[:1500]
+                              for i, doc in enumerate(context_docs)])[:2500]
 
             prompt = f"""<|system|>
 You are a professor of oncology. Give a detailed answer to the question. Answer in English only, do not use Russian
-Answer ONLY based on the provided medical guidelines.
-If the information is not in the documents, say: Not in my database:</|system|>
+Answer ONLY based on the provided medical guidelines. Include clinical indications, advantages, and limitations.
+Use complete paragraphs with smooth transitions. End with a comprehensive conclusion and clinical recommendations.
+Maintain professional academic tone throughout. Use complete paragraphs with smooth transitions.
+If the information is not in the documents, say: Not in my database, but:</|system|>
 
 <|user|>
 Вопрос: {query}
@@ -119,9 +122,44 @@ If the information is not in the documents, say: Not in my database:</|system|>
                 echo=False
             )
 
-            return response['choices'][0]['text'].strip()
+            text = response['choices'][0]['text'].strip()
+            return self._format_comprehensive_response(text, len(context_docs))
         except Exception as e:
             return f"Ошибка генерации: {str(e)}"
+
+    def _format_comprehensive_response(self, text: str, max_sources: int) -> str:
+        """Форматирование развернутого медицинского ответа"""
+        if not text:
+            return "A comprehensive response could not be generated based on the available sources."
+
+        # Удаляем технические артефакты и лишние ссылки
+        text = re.sub(r'\[?Source\s*[0-9]+\]?', '', text)
+        text = re.sub(r'\(Source [0-9]+\)', '', text)
+        text = re.sub(r'MEDICAL_SOURCE_[0-9]+:', '', text)
+
+        # Гарантируем минимальную длину ответа
+        # if len(text.split()) < 200:  # Если меньше 200 слов
+        #     text = self._enhance_response_length(text)
+
+        # Гарантируем корректное окончание - если текст обрывается, завершаем предложение
+        if not text.endswith(('.', '!', '?')):
+            # Ищем последнее законченное предложение
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+
+            if sentences:
+                # Если есть законченные предложения, берем все кроме последнего незавершенного
+                if len(sentences) > 1:
+                    formatted_text = ' '.join(sentences[:-1])
+                else:
+                    # Если только одно незавершенное предложение, добавляем точку
+                    formatted_text = sentences[0] + '.'
+            else:
+                # Если нет предложений, просто добавляем точку
+                formatted_text = text + '.'
+        else:
+            formatted_text = text
+
+        return formatted_text
 
     def close(self):
         """Освобождение ресурсов"""

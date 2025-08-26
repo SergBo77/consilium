@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN bun install
 
 COPY . . 
-RUN bunx --bun vite build
+RUN bun run --bun vite build
 
 ### Stage Two ###
 FROM ${APP_RUNNER}
