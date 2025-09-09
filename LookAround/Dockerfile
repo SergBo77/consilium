@@ -10,8 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN bun install
 
-COPY . . 
-RUN bun run --bun vite build
+COPY . .
 
 ### Stage Two ###
 FROM ${APP_RUNNER}
