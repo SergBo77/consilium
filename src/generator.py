@@ -70,7 +70,7 @@ class MedicalTextGenerator:
 
         return embeddings.cpu().numpy().squeeze().tolist()
 
-    def search_relevant_documents(self, query: str, top_k: int = 3):
+    def search_relevant_documents(self, query: str, top_k: int = 5):
         """Поиск документов с использованием BioBERT"""
         try:
             query_vector = self.get_embedding_query(query)
@@ -87,15 +87,16 @@ class MedicalTextGenerator:
             return []
 
     @lru_cache(maxsize=100)  # Кэширует последние 100 запросов
-    def generate_medical_text(self, query: str, max_tokens: int = 512) -> str:
+    def generate_medical_text(self, query: str, max_tokens: int = 2048) -> str:
         """Генерация медицинского ответа"""
         try:
             context_docs = self.search_relevant_documents(query)
             if not context_docs:
                 return "No relevant documents found" # Четкое уведомление об отсутствии данных
 
-            context = "\n".join([f"[Источник {i+1}]: {doc[:300]}"
-                              for i, doc in enumerate(context_docs)])[:2500]
+            #context = "\n".join([f"[Источник {i+1}]: {doc[:700]}"
+                              #for i, doc in enumerate(context_docs)])[:5000]
+            context = "\n".join([doc[:700] for doc in context_docs])[:5000]
 
             prompt = f"""<|system|>
 You are a professor of oncology. Give a detailed answer to the question. Answer in English only, do not use Russian

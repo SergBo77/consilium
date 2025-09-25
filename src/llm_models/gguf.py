@@ -9,7 +9,7 @@ class Gguf:
         self.model = Llama.from_pretrained(
             repo_id="mradermacher/JSL-Med-Phi-3.5-Mini-v3-i1-GGUF",
             filename="JSL-Med-Phi-3.5-Mini-v3.i1-Q4_K_M.gguf",
-            n_ctx=512,
+            n_ctx=2048,
             n_gpu_layers=-1,
             n_threads=8,
             n_batch=2048,

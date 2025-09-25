@@ -11,6 +11,7 @@ COPY package*.json ./
 RUN bun install
 
 COPY . .
+RUN bun vite build
 
 ### Stage Two ###
 FROM ${APP_RUNNER}
@@ -28,4 +29,5 @@ LABEL app.version="${BUILD_VERSION}"
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["-g", "daemon off;"]
+
 

@@ -4,7 +4,6 @@ from googletrans import Translator
 
 logger = logging.getLogger(__name__)
 
-
 class GoogleTranslator:
 
     def __init__(self):
